@@ -11,16 +11,16 @@ from mparts.util import initializeDisk, deinitializeDisk
 import hosts
 
 # https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.18.tar.xz
-ROOT  = "~/bench/vm-scalability/bench"
+ROOT  = "~/code/vbench"
 LINUX = os.path.join(ROOT, "tmp", "linux-3.18")
 LINUXSRC = os.path.join(ROOT, "..", "src", "linux")
 VMROOT = "/root/bench/vm-scalability/bench"
 VMLINUX = os.path.join(VMROOT, "tmp", "linux-3.18")
 PERFBIN = os.path.join("~/linux/tools/perf/perf")
 TRY   = 1
-CPU_STEP = 10
-CPU_CNTS = 80
-CORES_PER_SOCKET = 10
+CPU_STEP = 28
+CPU_CNTS = 224
+CORES_PER_SOCKET = 28
 
 # If set to True, do as few experiments as quickly as possible to test
 # the setup.  This is useful to do before the full benchmark suite
