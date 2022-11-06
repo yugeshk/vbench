@@ -12,7 +12,8 @@ import hosts
 
 # https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.18.tar.xz
 ROOT  = "~/code/vbench"
-LINUX = os.path.join(ROOT, "tmp", "linux-3.18")
+# LINUX = os.path.join(ROOT, "tmp", "linux-3.18")
+LINUX = "/home/ykothari/code/kcombiner/src/benchmarks/mosbench/linux"
 LINUXSRC = os.path.join(ROOT, "..", "src", "linux")
 VMROOT = "/root/bench/vm-scalability/bench"
 VMLINUX = os.path.join(VMROOT, "tmp", "linux-3.18")
@@ -153,7 +154,7 @@ shared *= mk(trials = trials)
 # re-enabled when the benchmark exits, even after an error.  Several
 # of the benchmarks do not otherwise restrict which cores they use,
 # and thus will give bogus results without this.
-shared *= mk(hotplug = True)
+shared *= mk(hotplug = False)
 
 # need the step count info for VM for it to be NUMA aware!
 shared *= mk(coresPerSocket = CORES_PER_SOCKET)
@@ -196,6 +197,38 @@ import gmake_qemu
 gmake_qemu = mk(benchmark = gmake_qemu.runner, nonConst = True)
 
 ##################################################################
+# psearchy
+#
+# mode - The mode to run mkdb in.  Must be "thread" or "process".
+#
+# seq - The sequence to assign cores in.  Must be "seq" for sequential
+# assignment or "rr" for round-robin assignment.
+#
+# mem - How much memory to allocate to the hash table on each core, in
+# megabytes.
+#
+# dblim - The maximum number of entries to store per Berkeley DB file.
+# None for no limit.
+
+import psearchy
+
+psearchy = mk(benchmark = psearchy.runner, nonConst = True)
+
+# if sanityRun:
+#     psearchy *= (mk(mode = ["thread"]) * mk(order = ["seq"]) +
+#                  mk(mode = ["process"]) * mk(order = ["rr"]))
+# else:
+#     psearchy *= (mk(mode = ["thread"]) * mk(order = ["seq"]) +
+#                  mk(mode = ["process"]) * mk(order = ["seq", "rr"]))
+if sanityRun:
+    psearchy *= (mk(mode = ["thread"]) * mk(order = ["seq"]))
+else:
+    psearchy *= (mk(mode = ["thread"]) * mk(order = ["seq"]))
+
+psearchy *= mk(mem = 48)
+psearchy *= mk(dblim = 200000)
+
+##################################################################
 # Exim
 #
 # eximBuild - The build name of Exim to run.  Corresponds to a
@@ -211,7 +244,7 @@ exim = mk(benchmark = exim.runner, nonConst = True)
 
 exim *= mk(eximBuild = "exim-mod")
 exim *= mk(eximPort = 2526)
-exim *= mk(clients = 160)
+exim *= mk(clients = 228)
 
 ##################################################################
 # RocksDB

@@ -31,7 +31,13 @@ all-rocksdb: always
 
 clean-rocksdb: always
 	$(MAKE) -C rocksdb clean
+ 
+ all-psearchy: always
+	$(MAKE) -C psearchy/mkdb all
 
+clean-psearchy: always
+	$(MAKE) -C psearchy/mkdb clean
+ 
 .PHONY: bench
 bench:
 	python config.py

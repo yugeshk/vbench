@@ -23,20 +23,20 @@ class EximDaemon(Task):
 
     def start(self):
         # fix -> http://vincent.bernat.im/en/blog/2014-tcp-time-wait-state-linux.html
-        self.host.sysctl("net.ipv4.tcp_tw_recycle", "1")
+        # self.host.sysctl("net.ipv4.tcp_tw_recycle", "1")
         # Create configuration
         config = self.host.outDir(self.name + ".configure")
-        self.host.r.run(
-            [os.path.join(self.eximPath, "mkconfig"),
+        print(config)
+        cmd = [os.path.join(self.eximPath, "mkconfig"),
              os.path.join(self.eximPath, self.eximBuild),
              self.mailDir, self.spoolDir],
-            stdout = config)
+        self.host.r.run(cmd, stdout = config)
 
         # Start Exim
-        self.__proc = self.host.r.run(
-            [os.path.join(self.eximPath, self.eximBuild, "bin", "exim"),
+        cmd = [os.path.join(self.eximPath, self.eximBuild, "bin", "exim"),
              "-bdf", "-oX", str(self.port), "-C", config],
-            wait = False)
+        print(cmd)
+        self.__proc = self.host.r.run(cmd, wait = False)
         waitForLog(self.host, os.path.join(self.spoolDir, "log", "mainlog"),
                    "exim", 5, "listening for SMTP")
 
@@ -78,6 +78,7 @@ class EximLoad(Task, ResultsProvider):
         cmd = [os.path.join(self.eximPath, "run-smtpbm"),
                str(self.clients), str(self.port)]
         cmd = self.sysmon.wrap(cmd, "Starting", "Stopped")
+        print(cmd)
 
         # Run
         logPath = self.host.getLogPath(self)
@@ -106,10 +107,10 @@ class EximRunner(object):
 
     @staticmethod
     def run(m, cfg):
-        if not cfg.hotplug:
-            raise RuntimeError("The Exim benchmark requires hotplug = True.  "
-                               "Either enable hotplug or disable the Exim "
-                               "benchmark in config.py.")
+        # if not cfg.hotplug:
+        #     raise RuntimeError("The Exim benchmark requires hotplug = True.  "
+        #                        "Either enable hotplug or disable the Exim "
+        #                        "benchmark in config.py.")
 
         host = cfg.primaryHost
         m += host
@@ -119,7 +120,7 @@ class EximRunner(object):
         fs = FileSystem(host, cfg.fs, clean = True)
         m += fs
         eximPath = os.path.join(cfg.benchRoot, "exim")
-        m += SetCPUs(host = host, num = cfg.cores)
+        # m += SetCPUs(host = host, num = cfg.cores)
         m += EximDaemon(host, eximPath, cfg.eximBuild,
                         os.path.join(fs.path + "0"),
                         os.path.join(fs.path + "spool"),
